@@ -124,6 +124,18 @@
               </a-form-item>
             </a-col>
             <a-col :span="8">
+              <a-form-item name="runtime">
+                <template #label>
+                  <span class="form-label">规划引擎</span>
+                </template>
+                <a-select v-model:value="formData.runtime" size="large" class="custom-select">
+                  <a-select-option value="langgraph">🕸️ LangGraph (阶段A默认)</a-select-option>
+                  <a-select-option value="helloagents">🤖 HelloAgents (兼容模式)</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+
+            <a-col :span="8">
               <a-form-item name="preferences">
                 <template #label>
                   <span class="form-label">旅行偏好</span>
@@ -224,7 +236,8 @@ const formData = reactive<TripFormData & { start_date: Dayjs | null; end_date: D
   transportation: '公共交通',
   accommodation: '经济型酒店',
   preferences: [],
-  free_text_input: ''
+  free_text_input: '',
+  runtime: 'langgraph'
 })
 
 // 监听日期变化,自动计算旅行天数
@@ -280,7 +293,8 @@ const handleSubmit = async () => {
       transportation: formData.transportation,
       accommodation: formData.accommodation,
       preferences: formData.preferences,
-      free_text_input: formData.free_text_input
+      free_text_input: formData.free_text_input,
+      runtime: formData.runtime
     }
 
     const response = await generateTripPlan(requestData)

@@ -85,6 +85,7 @@ export interface TripFormData {
   accommodation: string
   preferences: string[]
   free_text_input: string
+  runtime?: 'langgraph' | 'helloagents'
 }
 
 export interface TripPlanResponse {
@@ -92,4 +93,3 @@ export interface TripPlanResponse {
   message: string
   data?: TripPlan
 }
-

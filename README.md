@@ -210,3 +210,73 @@ CC BY-NC-SA 4.0
 
 **HelloAgents智能旅行助手** - 让旅行计划变得简单而智能 🌈
 
+
+
+## 🧭 阶段A改造说明（LangChain + LangGraph）
+
+阶段A已完成“执行框架迁移”：后端新增 `langgraph` 运行时，并保留 `helloagents` 兼容运行时。
+
+### 新增能力
+
+- 默认使用 `langgraph` 执行旅行规划流程（景点 -> 天气 -> 酒店 -> 规划）。
+- 前端可选择运行时：`langgraph`（默认）或 `helloagents`（兼容）。
+- API入参新增 `runtime` 字段，前后端已对齐。
+
+### 关键文件
+
+- `backend/app/agents/langgraph_trip_planner.py`：LangGraph 主流程与状态定义。
+- `backend/app/services/langchain_service.py`：LangChain LLM 初始化。
+- `backend/app/agents/runtime_manager.py`：运行时路由与单例管理。
+- `backend/app/api/routes/trip.py`：根据 `runtime` 选择后端运行时。
+- `backend/app/models/schemas.py`：`TripRequest` 新增 `runtime` 字段。
+- `frontend/src/views/Home.vue`：新增“规划引擎”选择器。
+- `frontend/src/types/index.ts`：`TripFormData` 新增 `runtime` 类型。
+
+### Lang 系列知识点映射
+
+- **LangChain**：`ChatOpenAI` 统一模型调用封装。
+- **LangGraph**：使用 `StateGraph` 描述节点状态流转和可扩展工作流。
+- **可迁移架构**：通过 `runtime_manager` 并存新旧实现，支持灰度切换。
+
+## 🛠️ 本地安装与运行（阶段A）
+
+### 1. 你需要准备的内容
+
+- 高德地图 API Key（`AMAP_API_KEY`）
+- LLM Key（`LLM_API_KEY` 或 `OPENAI_API_KEY`）
+- 可选：自定义模型地址（`LLM_BASE_URL`）与模型名（`LLM_MODEL_ID`）
+
+### 2. 后端
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# 在 .env 中填写 AMAP_API_KEY 与 LLM_API_KEY
+python run.py
+```
+
+### 3. 前端
+
+```bash
+cd frontend
+npm install
+# 可选: 配置 VITE_API_BASE_URL，默认 http://localhost:8000
+npm run dev
+```
+
+### 4. 使用方式
+
+- 打开前端后，在“规划引擎”下拉框选择：
+  - `LangGraph (阶段A默认)`
+  - `HelloAgents (兼容模式)`
+- 提交后会调用 `POST /api/trip/plan`，并携带 `runtime` 字段。
+
+## 🚢 部署建议（阶段A）
+
+- 建议把后端容器与前端容器分离部署。
+- 后端需注入环境变量：`AMAP_API_KEY`、`LLM_API_KEY`（必填）。
+- 若使用企业模型网关，设置 `LLM_BASE_URL` 与 `LLM_MODEL_ID`。
+- 生产环境建议关闭 `reload`，并通过进程管理器（gunicorn/uvicorn workers）运行。
