@@ -27,3 +27,8 @@ uv>=0.8.0
 # 其他工具
 python-dateutil>=2.8.2
 huggingface_hub>=0.25.0
+# LangChain / LangGraph (阶段A)
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langgraph>=0.2.0
+

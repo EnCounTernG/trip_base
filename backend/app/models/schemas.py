@@ -1,6 +1,6 @@
 """数据模型定义"""
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Literal
 from pydantic import BaseModel, Field, field_validator
 from datetime import date
 
@@ -17,6 +17,10 @@ class TripRequest(BaseModel):
     accommodation: str = Field(..., description="住宿偏好", example="经济型酒店")
     preferences: List[str] = Field(default=[], description="旅行偏好标签", example=["历史文化", "美食"])
     free_text_input: Optional[str] = Field(default="", description="额外要求", example="希望多安排一些博物馆")
+    runtime: Optional[Literal["langgraph", "helloagents"]] = Field(
+        default="langgraph",
+        description="旅行规划运行时,阶段A支持langgraph或helloagents"
+    )
     
     class Config:
         json_schema_extra = {
@@ -28,7 +32,8 @@ class TripRequest(BaseModel):
                 "transportation": "公共交通",
                 "accommodation": "经济型酒店",
                 "preferences": ["历史文化", "美食"],
-                "free_text_input": "希望多安排一些博物馆"
+                "free_text_input": "希望多安排一些博物馆",
+                "runtime": "langgraph"
             }
         }
 
@@ -203,4 +208,3 @@ class ErrorResponse(BaseModel):
     success: bool = Field(default=False, description="是否成功")
     message: str = Field(..., description="错误消息")
     error_code: Optional[str] = Field(default=None, description="错误代码")
-

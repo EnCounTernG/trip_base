@@ -6,7 +6,7 @@ from ...models.schemas import (
     TripPlanResponse,
     ErrorResponse
 )
-from ...agents.trip_planner_agent import get_trip_planner_agent
+from ...agents.runtime_manager import get_trip_planner_runtime
 
 router = APIRouter(prefix="/trip", tags=["旅行规划"])
 
@@ -36,8 +36,9 @@ async def plan_trip(request: TripRequest):
         print(f"{'='*60}\n")
 
         # 获取Agent实例
-        print("🔄 获取多智能体系统实例...")
-        agent = get_trip_planner_agent()
+        selected_runtime = request.runtime or "langgraph"
+        print(f"🔄 获取旅行规划运行时实例: {selected_runtime}")
+        agent = get_trip_planner_runtime(selected_runtime)
 
         # 生成旅行计划
         print("🚀 开始生成旅行计划...")
@@ -70,17 +71,16 @@ async def health_check():
     """健康检查"""
     try:
         # 检查Agent是否可用
-        agent = get_trip_planner_agent()
-        
+        # 默认检查langgraph运行时
+        agent = get_trip_planner_runtime("langgraph")
+
         return {
             "status": "healthy",
             "service": "trip-planner",
-            "agent_name": agent.agent.name,
-            "tools_count": len(agent.agent.list_tools())
+            "runtime": getattr(agent, "runtime_name", "helloagents")
         }
     except Exception as e:
         raise HTTPException(
             status_code=503,
             detail=f"服务不可用: {str(e)}"
         )
-
